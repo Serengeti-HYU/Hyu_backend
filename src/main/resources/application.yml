@@ -1,0 +1,9 @@
+logging:
+  level:
+    com.serengeti.hyu.backend: DEBUG
+spring:
+  profiles:
+    include: secret
+  output:
+    ansi:
+      enabled: always
