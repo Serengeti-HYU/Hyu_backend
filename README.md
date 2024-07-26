@@ -3,7 +3,7 @@
 
 #### 📍Domain 
 * auth - @chaechaeyeon
-* character - @hyun-jung-joo
+* character - @hyunnnny
 * emotion - @soeun
 * news - @Hszoo
 * purchase - @Hszoo
