@@ -1,5 +1,6 @@
 package com.serengeti.hyu.backend.user.service;
 
+import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
 import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
@@ -29,11 +30,17 @@ public class UserService {
                 .email(signUpDto.getEmail())
                 .build();
 
-        User savedUser = userRepository.save(newUser);
-
-
+        userRepository.save(newUser);
     }
 
+    public String login(LoginDto loginDto) {
+        User user = userRepository.findByUsername(loginDto.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 사용자입니다."));
+        if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+        }
+        return "로그인 성공";
+    }
 
 
 }

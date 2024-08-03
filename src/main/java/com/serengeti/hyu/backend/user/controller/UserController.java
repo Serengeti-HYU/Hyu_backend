@@ -1,5 +1,6 @@
 package com.serengeti.hyu.backend.user.controller;
 
+import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
 import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.service.UserService;
@@ -28,8 +29,18 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody SignUpDto signUpDto) {
         userService.signUp(signUpDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
     }
+
     //로그인
-    
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto loginDto){
+        try {
+            userService.login(loginDto);
+            return ResponseEntity.ok("로그인 성공");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
 }
+
