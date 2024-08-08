@@ -1,6 +1,5 @@
 package com.serengeti.hyu.backend.subscribe.service;
 
-import com.serengeti.hyu.backend.news.dto.NewsDto;
 import com.serengeti.hyu.backend.news.entity.News;
 import com.serengeti.hyu.backend.news.repository.NewsRepository;
 import com.serengeti.hyu.backend.subscribe.SubscribeManager;

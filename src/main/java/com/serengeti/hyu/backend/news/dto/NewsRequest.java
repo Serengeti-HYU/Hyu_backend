@@ -3,7 +3,6 @@ package com.serengeti.hyu.backend.news.dto;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Builder
 @Getter
