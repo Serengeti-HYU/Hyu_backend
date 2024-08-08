@@ -24,7 +24,7 @@ public class SubscribeController {
     @PostMapping("/sendMail")
     @ResponseBody
     public String SendMail(@RequestParam String email) throws Exception {
-        return subscribeService.sendNewsLetterTest(email);
+        return subscribeService.sendNewsLetter(email);
     }
 
 }
