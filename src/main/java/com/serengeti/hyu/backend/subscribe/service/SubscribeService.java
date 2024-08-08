@@ -51,16 +51,24 @@ public class SubscribeService {
         logger.info("뉴스레터 전송 완료");
     }
 
-    public String subscribeNewsLetter(String userName, SubscribeDto request) {
+    public SubscribeDto subscribeNewsLetter(String userName, SubscribeDto request) {
 
         // 사용자 확인
         User user = userRepository.findByUsername(userName)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
+        boolean exists = subscribeRepository.existsByUserAndEmail(user, request.getEmail());
+
+        // 이미 구독 중
+        if (exists) {
+            throw new RuntimeException("이미 구독이 존재합니다.");
+        }
+
+
         // 구독 상태 설정
         Subscribe.Status status = Subscribe.Status.ACTIVE;
 
-        // 사용자 존재 O
+        // 사용자 구독 생성
         Subscribe subscribe = Subscribe.builder()
                 .user(user)
                 .email(request.getEmail())
@@ -70,7 +78,48 @@ public class SubscribeService {
 
 
         subscribeRepository.save(subscribe);
-        return "구독 완료";
+
+        return SubscribeDto.builder()
+                .email(subscribe.getEmail())
+                .dayOfWeek(subscribe.getDayOfWeek())
+                .status(subscribe.getStatus())
+                .build();
+    }
+
+    // 뉴스레터 구독 취소
+    public String unsubscribeNewsLetter(String userName) {
+        User user = userRepository.findByUsername(userName)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        Subscribe subscribe = subscribeRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("구독 정보를 찾을 수 없습니다."));
+
+        subscribeRepository.delete(subscribe);
+        return "구독 취소 완료";
+    }
+
+    // 뉴스레터 구독 상태 수정
+    public SubscribeDto updateSubscribe(String userName, SubscribeDto request) {
+        User user = userRepository.findByUsername(userName)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        Subscribe subscribe = subscribeRepository.findByUserAndEmail(user, request.getEmail())
+                .orElseThrow(() -> new RuntimeException("구독 정보를 찾을 수 없습니다."));
+
+        // 구독 정보 업데이트
+        subscribe.setStatus(request.getStatus());
+        subscribe.setEmail(request.getEmail());
+        subscribe.setDayOfWeek(request.getDayOfWeek());
+
+        // 저장
+        subscribeRepository.save(subscribe);
+
+        // 업데이트된 구독 정보를 DTO로 변환하여 반환
+        return SubscribeDto.builder()
+                .email(subscribe.getEmail())
+                .dayOfWeek(subscribe.getDayOfWeek())
+                .status(subscribe.getStatus())
+                .build();
     }
 
 
