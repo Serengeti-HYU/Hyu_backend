@@ -2,20 +2,20 @@ package com.serengeti.hyu.backend.news.dto;
 
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class NewsDto {
+public class NewsRequest {
 
     private String title;
 
     private String content;
 
-    private Date createdDate;
+    private LocalDate createdDate;
 
     private String link;
 }
