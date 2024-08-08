@@ -3,7 +3,6 @@ package com.serengeti.hyu.backend.news.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 @Entity

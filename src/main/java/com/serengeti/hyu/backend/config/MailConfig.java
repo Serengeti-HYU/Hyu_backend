@@ -29,7 +29,7 @@ public class MailConfig {
         mailSender.setHost(host); // 속성
         mailSender.setPort(port); // 587 포트 지정
         mailSender.setUsername(username);// 메일 전송 계정 (HYU)
-        mailSender.setPassword(password); //구글 앱 비밀번호를 넣습니다.
+        mailSender.setPassword(password); //구글 앱 비밀번호
 
         Properties javaMailProperties = new Properties(); // JavaMail의 속성 설정
         javaMailProperties.put("mail.transport.protocol", "smtp");// smtp 프로토콜
