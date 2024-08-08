@@ -1,9 +1,6 @@
 package com.serengeti.hyu.backend.subscribe;
 
-import com.serengeti.hyu.backend.news.dto.NewsDto;
 import com.serengeti.hyu.backend.news.entity.News;
-import com.serengeti.hyu.backend.subscribe.dto.SubscribeDto;
-import com.serengeti.hyu.backend.subscribe.entity.Subscribe;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import lombok.NoArgsConstructor;
@@ -21,7 +18,7 @@ public class SubscribeManager {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public void send(String sendTo, NewsDto newsDto) throws Exception {
+    public void send(String sendTo, News newsDto) throws Exception {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         mimeMessage.setFrom(sendFrom);
         mimeMessage.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(sendTo));

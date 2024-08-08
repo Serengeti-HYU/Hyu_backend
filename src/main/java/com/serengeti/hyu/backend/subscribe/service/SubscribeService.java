@@ -1,6 +1,8 @@
 package com.serengeti.hyu.backend.subscribe.service;
 
 import com.serengeti.hyu.backend.news.dto.NewsDto;
+import com.serengeti.hyu.backend.news.entity.News;
+import com.serengeti.hyu.backend.news.repository.NewsRepository;
 import com.serengeti.hyu.backend.subscribe.SubscribeManager;
 import com.serengeti.hyu.backend.subscribe.dto.SubscribeDto;
 import com.serengeti.hyu.backend.subscribe.entity.Subscribe;
@@ -14,6 +16,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -26,11 +30,16 @@ public class SubscribeService {
     private final SubscribeRepository subscribeRepository;
     private final UserRepository userRepository;
     private final SubscribeManager subscribeManager;
+    private final NewsRepository newsRepository;
 
     @Scheduled(cron = "0 0 9 * * *") // 매일 오전 9시
     public void sendWeeklyNewsLetter() {
-        // 구독자 전체 조회
-        List<Subscribe> subscribers = subscribeRepository.findAll();
+
+        // 오늘 요일
+        DayOfWeek today = LocalDate.now().getDayOfWeek();
+        // 오늘 요일에 구독한 사용자 조회
+        List<Subscribe> subscribers = subscribeRepository.findByDayOfWeek(today);
+
 
         for (Subscribe subscribe : subscribers) {
             String email = subscribe.getEmail();
@@ -68,13 +77,21 @@ public class SubscribeService {
 
     public String sendNewsLetter(String email) {
 
+        LocalDate today = LocalDate.now();
         try {
-            NewsDto newsDto = new NewsDto();
-            newsDto.setTitle("[HYU] 정기 뉴스레터");
-            newsDto.setContent("HYU의 뉴스레터 내용입니다.");
-            newsDto.setLink("https://github.com/Serengeti-HYU/Hyu_backend.git");
+            List<News> newsLetter = newsRepository.findByDate(today);
 
-            subscribeManager.send(email, newsDto);
+
+            for(News news : newsLetter) {
+                subscribeManager.send(email, news);
+            }
+
+//            NewsDto newsDto = new NewsDto();
+//            newsDto.setTitle(newsLetter.getTitle());
+//            newsDto.setContent(newsLetter.getContent());
+//            newsDto.setLink(newsLetter.getLink());
+
+
 
             return "뉴스레터 전송 완료";
         } catch (Exception e) {
@@ -83,25 +100,6 @@ public class SubscribeService {
         }
     }
 
-    public String sendNewsLetterTest(String email) {
-        if (!isValidEmail(email) || email.isEmpty()) {
-            return "이메일 주소가 유효하지 않습니다.";
-        }
-
-        try {
-            NewsDto newsDto = new NewsDto();
-            newsDto.setTitle("[HYU] 정기 뉴스레터");
-            newsDto.setContent("HYU의 뉴스레터 내용입니다.");
-            newsDto.setLink("https://github.com/Serengeti-HYU/Hyu_backend.git");
-
-            subscribeManager.send(email, newsDto);
-
-            return "뉴스레터 전송 완료";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     // Email 주소 형식 점검
     private boolean isValidEmail(String email) {

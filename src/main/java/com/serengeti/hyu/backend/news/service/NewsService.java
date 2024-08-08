@@ -19,7 +19,7 @@ public class NewsService {
 
         News news = new News();
         news.setTitle(request.getTitle());
-        news.setCreatedDate(LocalDate.now());
+        news.setDate(LocalDate.now());
         news.setContent(request.getContent());
         news.setLink(request.getLink());
 
