@@ -2,14 +2,15 @@ package com.serengeti.hyu.backend.user.controller;
 
 import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
-import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+
 
 @Controller
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDto loginDto){
         try {
-            userService.login(loginDto);
-            return ResponseEntity.ok("로그인 성공");
+            String token = userService.login(loginDto);
+            return ResponseEntity.ok(token); //jwt 토큰
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }

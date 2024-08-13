@@ -17,3 +17,5 @@ spring:
       hibernate:
         ddl-auto=update
       dialect: org.hibernate.dialect.MySQL8Dialect
+  config:
+    import: classpath:application-secret.yml
