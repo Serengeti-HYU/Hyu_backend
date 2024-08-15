@@ -117,7 +117,9 @@ public class RestService {
     }
 
     private void saveRestData(List<RestDto> dtoList) {
-        List<Rest> restList = dtoList.stream().map(dto -> {
+        List<Rest> restList = dtoList.stream()
+                .filter(dto -> !restRepository.existsByRestName(dto.getRestName()))
+                .map(dto -> {
             Rest rest = new Rest();
             rest.setRestName(dto.getRestName());
             rest.setDescription(dto.getDescription());
