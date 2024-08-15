@@ -1,28 +1,29 @@
 package com.serengeti.hyu.backend.emotion.entity;
 
-
 import com.serengeti.hyu.backend.user.entity.User;
 import jakarta.persistence.*;
-import java.util.Date;
+import lombok.*;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.util.Date;
 
 @Entity
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 @Setter
-@Table(name = "Emotion")
-public class Emotion  {
+@Table(name="Emotion")
+public class Emotion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int recordId;
 
     @ManyToOne
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable=false) // 외래 키 열 이름을 명시적으로 SnakeCase로 지정
     private User user;
 
     private String emotionImg;
-    private String emotion;
     private Date recordDate;
     private String content;
 }
