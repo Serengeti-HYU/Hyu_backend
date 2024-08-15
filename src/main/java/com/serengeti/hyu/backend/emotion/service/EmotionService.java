@@ -6,8 +6,10 @@ import com.serengeti.hyu.backend.emotion.exception.EmotionAlreadyExistsException
 import com.serengeti.hyu.backend.emotion.repository.EmotionRepository;
 import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -52,6 +54,7 @@ public class EmotionService {
         return emotionRepository.save(emotion);
     }
 
+    @Transactional
     public Emotion updateEmotion(Long userId, int recordId, EmotionDto request) {
         Emotion existingEmotion = emotionRepository.findById(recordId)
                 .orElseThrow(() -> new RuntimeException("Emotion record not found"));
@@ -71,6 +74,7 @@ public class EmotionService {
         return emotionRepository.save(updatedEmotion);
     }
 
+    @Transactional
     // 특정 날짜를 기준으로 그 주의 감정 기록을 조회하는 메서드 추가
     public List<Emotion> getEmotionsByWeek(Long userId, Date date) {
         Calendar cal = Calendar.getInstance();
@@ -90,6 +94,7 @@ public class EmotionService {
         return emotionRepository.findByUser_UserIdAndRecordDateBetween(userId, startDate, endDate);
     }
 
+    @Transactional
     //게시글 상세조회
     public Emotion getEmotionByDate(Long userId, Date recordDate) {
         Calendar cal = Calendar.getInstance();
