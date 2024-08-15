@@ -50,7 +50,7 @@ public class RestService {
         List<RestDto> dtoList = parseJson(openAPI);
 
         // DTO -> 엔티티 저장
-        saveData(dtoList);
+        saveRestData(dtoList);
     }
 
     private String fetchEvent(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
@@ -116,9 +116,7 @@ public class RestService {
         return dtoList;
     }
 
-
-
-    private void saveData(List<RestDto> dtoList) {
+    private void saveRestData(List<RestDto> dtoList) {
         List<Rest> restList = dtoList.stream().map(dto -> {
             Rest rest = new Rest();
             rest.setRestName(dto.getRestName());
@@ -131,5 +129,24 @@ public class RestService {
         }).collect(Collectors.toList());
 
         restRepository.saveAll(restList);
+    }
+
+
+    // 데이터 조회 메서드 추가
+    public List<RestDto> getRestData() {
+        List<Rest> events = restRepository.findAll();
+        return events.stream()
+                .map(event -> {
+                    RestDto dto = new RestDto();
+                    dto.setRestId(event.getRestId());
+                    dto.setRestName(event.getRestName());
+                    dto.setDescription(event.getDescription());
+                    dto.setCategory(event.getCategory());
+                    dto.setImage(event.getImage());
+                    dto.setLink(event.getLink());
+                    dto.setPlace(event.getPlace());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }
