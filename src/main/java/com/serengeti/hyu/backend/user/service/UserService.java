@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +59,35 @@ public class UserService {
 
         String username = user.getUsername();
         sendFindEmail(user.getEmail(), "휴 아이디 찾기", "고객님의 아이디는 " + username + "입니다.");
+    }
+
+    // 비밀번호 찾기
+    public void sendTemporaryPassword(String username, String name, String email) {
+        User user = userRepository.findByUsernameAndNameAndEmail(username, name, email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+     //임시비밀번호생성
+        String temporaryPassword = generateTemporaryPassword();
+        user.setPassword(passwordEncoder.encode(temporaryPassword));
+        userRepository.save(user);
+        sendFindEmail(user.getEmail(), "휴 임시 비밀번호 발송 메일입니다", "임시 비밀번호는 " + temporaryPassword + "입니다."+"로그인 후 비밀번호 재설정해주세요");
+
+    }
+
+    // 비밀번호 변경
+//    public void changePassword(String username, String oldPassword, String newPassword) {
+//        User user = userRepository.findByUsername(username)
+//                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+//
+//        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+//            throw new IllegalArgumentException("기존 비밀번호가 일치하지 않습니다.");
+//        }
+//        user.setPassword(passwordEncoder.encode(newPassword));
+//        userRepository.save(user);
+//    }
+
+    // 임시 비밀번호 생성
+    private String generateTemporaryPassword() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 
     private void sendFindEmail(String to, String subject, String text) {
