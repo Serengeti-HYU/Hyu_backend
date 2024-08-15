@@ -1,6 +1,7 @@
 package com.serengeti.hyu.backend.rest.controller;
 
 import com.serengeti.hyu.backend.rest.dto.RestDto;
+import com.serengeti.hyu.backend.rest.entity.Rest;
 import com.serengeti.hyu.backend.rest.repository.RestRepository;
 import com.serengeti.hyu.backend.rest.service.RestService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -39,6 +41,17 @@ public class RestController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Collections.emptyList());
+        }
+    }
+
+    // 쉼활동 상세 조회
+    @GetMapping("/{restId}")
+    public ResponseEntity<Rest> getRestById(@PathVariable int restId) {
+        Rest rest = restService.getRestById(restId);
+        if (rest != null) {
+            return ResponseEntity.ok(rest);
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 }
