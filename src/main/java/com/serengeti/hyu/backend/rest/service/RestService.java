@@ -151,4 +151,9 @@ public class RestService {
                 })
                 .collect(Collectors.toList());
     }
+
+    // 상세 조회
+    public Rest getRestById(int restId) {
+        return restRepository.findById(restId).orElse(null);
+    }
 }
