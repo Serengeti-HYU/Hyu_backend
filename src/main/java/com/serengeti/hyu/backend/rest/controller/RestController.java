@@ -4,14 +4,14 @@ import com.serengeti.hyu.backend.rest.dto.RestDto;
 import com.serengeti.hyu.backend.rest.entity.Rest;
 import com.serengeti.hyu.backend.rest.repository.RestRepository;
 import com.serengeti.hyu.backend.rest.service.RestService;
+import com.serengeti.hyu.backend.rest.service.ScrapService;
+import com.serengeti.hyu.backend.user.entity.User;
+import com.serengeti.hyu.backend.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -26,6 +26,13 @@ public class RestController {
 
     @Autowired
     private RestRepository restRepository;
+
+
+    @Autowired
+    private ScrapService scrapService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // 쉼활동 목록 조회
     @GetMapping("/recommend")
@@ -53,5 +60,46 @@ public class RestController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+
+    // 쉼활동 저장
+    @PostMapping("/{restId}/bookmark")
+    public ResponseEntity<?> scrapRest(
+            @PathVariable int restId,
+            @RequestParam Long userId) {
+
+        Rest rest = restService.getRestById(restId);
+        if (rest == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("유저아이디가 없습니다!");
+        }
+
+        scrapService.addScrap(user, rest);
+        return ResponseEntity.ok("쉼활동 저장이 완료되었습니다.");
+    }
+
+    // 쉼활동 취소
+    @DeleteMapping("/{restId}/bookmark")
+    public ResponseEntity<?> removeScrap(
+            @PathVariable int restId,
+            @RequestParam Long userId) {
+
+        Rest rest = restService.getRestById(restId);
+        if (rest == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("유저아이디가 없습니다!");
+        }
+
+        scrapService.removeScrap(user, rest);
+        return ResponseEntity.ok("스크랩이 취소되었습니다.");
     }
 }
