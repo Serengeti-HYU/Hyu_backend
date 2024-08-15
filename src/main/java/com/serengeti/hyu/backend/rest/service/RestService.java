@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RestService {
@@ -27,98 +28,98 @@ public class RestService {
     private String apiUrl;
 
     @Value("${openApi.key}")
-    private String key;
+    private String apiKey;
 
     @Value("${openApi.serviceName}")
     private String serviceName;
 
     @Value("${openApi.dataType}")
-    private String type;
+    private String dataType;
 
     @Autowired
-    private RestRepository restRepository;// 주입된 Repository
+    private RestRepository restRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public void fetchAndSaveCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
         // API 호출
-        String jsonResponse = getCulturalEventInfo(startIndex, endIndex, codename, title, date);
+        String openAPI = fetchEvent(startIndex, endIndex, codename, title, date);
 
-        // JSON -> DTO 변환
-        List<RestDto> dtoList = parseJsonToDTO(jsonResponse);
+        // OpenAPI(JSON) -> DTO 변환
+        List<RestDto> dtoList = parseJson(openAPI);
 
         // DTO -> 엔티티 저장
-        saveDTOToEntity(dtoList);
+        saveData(dtoList);
     }
 
-    public String getCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
-        HttpURLConnection urlConnection = null;
-        InputStream stream = null;
-        String result;
+    private String fetchEvent(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
+        String urlStr = UriComponentsBuilder.fromHttpUrl(apiUrl)
+                .pathSegment(apiKey, dataType, serviceName)
+                .pathSegment(startIndex.toString(), endIndex.toString())
+                .queryParam("CODENAME", Optional.ofNullable(codename).filter(c -> !c.isEmpty()).orElse(null))
+                .queryParam("TITLE", Optional.ofNullable(title).filter(t -> !t.isEmpty()).orElse(null))
+                .queryParam("DATE", date)
+                .build()
+                .toUriString();
 
-        try {
-            String urlStr = UriComponentsBuilder.fromHttpUrl(apiUrl)
-                    .pathSegment(key, type, serviceName)
-                    .pathSegment(startIndex.toString(), endIndex.toString())
-                    .queryParam("CODENAME", Optional.ofNullable(codename).filter(c -> !c.isEmpty()))
-                    .queryParam("TITLE", Optional.ofNullable(title).filter(c -> !c.isEmpty()))
-                    .queryParam("DATE", Optional.ofNullable(date))
-                    .build()
-                    .toUriString();
+        System.out.println("Generated URL: " + urlStr);
 
-            System.out.println("Generated URL: " + urlStr);
+        HttpURLConnection urlConnection = (HttpURLConnection) new URL(urlStr).openConnection();
+        urlConnection.setConnectTimeout(10000);
+        urlConnection.setReadTimeout(10000);
+        urlConnection.setRequestMethod("GET");
 
-            URL url = new URL(urlStr);
-            urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.setConnectTimeout(10000);
-            urlConnection.setReadTimeout(10000);
-
-            stream = getNetworkConnection(urlConnection);
-            result = readStreamToString(stream);
-
-            if (stream != null) stream.close();
+        try (InputStream inputStream = getInputStream(urlConnection)) {
+            return readStream(inputStream);
         } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
+            urlConnection.disconnect();
+        }
+    }
+
+    private InputStream getInputStream(HttpURLConnection connection) throws IOException {
+        if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            throw new IOException("HTTP error code: " + connection.getResponseCode());
+        }
+        return connection.getInputStream();
+    }
+
+    private String readStream(InputStream inputStream) throws IOException {
+        StringBuilder result = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line).append("\n");
             }
         }
-
-        return result;
+        return result.toString();
     }
 
-    //JSON -> DTO저장
-    private List<RestDto> parseJsonToDTO(String jsonResponse) {
-        ObjectMapper objectMapper = new ObjectMapper();
+    private List<RestDto> parseJson(String jsonResponse) throws IOException {
         List<RestDto> dtoList = new ArrayList<>();
+        JsonNode rows = objectMapper.readTree(jsonResponse)
+                .path("culturalEventInfo").path("row");
 
-        try {
-            JsonNode rootNode = objectMapper.readTree(jsonResponse);
-            JsonNode rowArray = rootNode.path("culturalEventInfo").path("row");
-
-            if (rowArray.isArray()) {
-                for (JsonNode node : rowArray) {
-                    RestDto dto = new RestDto();
-                    dto.setRestName(node.path("TITLE").asText());
-                    dto.setDescription(node.path("PROGRAM").asText());
-                    dto.setCategory(node.path("CODENAME").asText());
-                    dto.setImage(node.path("MAIN_IMG").asText());
-                    dto.setLink(node.path("ORG_LINK").asText());
-                    dto.setPlace(node.path("PLACE").asText());
-
-                    dtoList.add(dto);
-                }
+        if (rows.isArray()) {
+            for (JsonNode node : rows) {
+                RestDto dto = new RestDto();
+                dto.setRestName(node.path("TITLE").asText());
+                dto.setDescription(node.path("PROGRAM").asText());
+                dto.setCategory(node.path("CODENAME").asText());
+                dto.setImage(node.path("MAIN_IMG").asText());
+                dto.setLink(node.path("ORG_LINK").asText());
+                dto.setPlace(node.path("PLACE").asText());
+                dtoList.add(dto);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            //에러처리
         }
 
         return dtoList;
     }
 
-    private void saveDTOToEntity(List<RestDto> dtoList) {
-        List<Rest> restList = new ArrayList<>();
 
-        for (RestDto dto : dtoList) {
+
+    private void saveData(List<RestDto> dtoList) {
+        List<Rest> restList = dtoList.stream().map(dto -> {
             Rest rest = new Rest();
             rest.setRestName(dto.getRestName());
             rest.setDescription(dto.getDescription());
@@ -126,36 +127,9 @@ public class RestService {
             rest.setImage(dto.getImage());
             rest.setLink(dto.getLink());
             rest.setPlace(dto.getPlace());
-
-            restList.add(rest);
-        }
+            return rest;
+        }).collect(Collectors.toList());
 
         restRepository.saveAll(restList);
     }
-
-
-    private InputStream getNetworkConnection(HttpURLConnection urlConnection) throws IOException {
-        urlConnection.setRequestMethod("GET");
-        urlConnection.setDoInput(true);
-
-        if (urlConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-            throw new IOException("HTTP error code : " + urlConnection.getResponseCode());
-        }
-
-        return urlConnection.getInputStream();
-    }
-
-    private String readStreamToString(InputStream stream) throws IOException {
-        StringBuilder result = new StringBuilder();
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(stream, "UTF-8"))) {
-            String readLine;
-            while ((readLine = br.readLine()) != null) {
-                result.append(readLine).append("\n");
-            }
-        }
-
-        return result.toString();
-    }
 }
-
