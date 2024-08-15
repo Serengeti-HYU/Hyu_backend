@@ -3,9 +3,11 @@ package com.serengeti.hyu.backend.user.service;
 import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
 import com.serengeti.hyu.backend.user.entity.User;
+import com.serengeti.hyu.backend.config.JwtTokenUtil;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +18,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenUtil jwtTokenUtil;
 
     @Transactional
     public void signUp(SignUpDto signUpDto){
-
         String encryptedPassword = passwordEncoder.encode(signUpDto.getPassword());
         User newUser = User.builder()
                 .name(signUpDto.getName())
@@ -39,6 +41,6 @@ public class UserService {
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
-        return "로그인 성공";
+        return jwtTokenUtil.generateToken(user);
     }
 }
