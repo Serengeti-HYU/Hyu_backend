@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 
 
 @Controller
@@ -43,5 +44,47 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+
+    //아이디 찾기
+    @PostMapping("/forgot-id")
+    public ResponseEntity<String> forgotId(@RequestBody Map<String, String> request) {
+        String name = request.get("name");
+        String email = request.get("email");
+        try {
+            userService.sendIdToEmail(name, email);
+            return ResponseEntity.ok("아이디가 이메일로 발송되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    //비밀번호 찾기
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String name = request.get("name");
+        String email = request.get("email");
+        try {
+            userService.sendTemporaryPassword(username, name, email);
+            return ResponseEntity.ok("임시 비밀번호가 이메일로 발송되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+    //비밀번호 변경
+//    @PostMapping("/change-password")
+//    public ResponseEntity<String> changePassword(@RequestBody Map<String, String> request) {
+//        String username = request.get("username");
+//        String oldPassword = request.get("oldPassword");
+//        String newPassword = request.get("newPassword");
+//        try {
+//            userService.changePassword(username, oldPassword, newPassword);
+//            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//        } catch (IllegalArgumentException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+//        }
+//    }
+
+    
 }
 
