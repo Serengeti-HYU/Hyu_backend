@@ -2,14 +2,21 @@ package com.serengeti.hyu.backend.rest.controller;
 
 import com.serengeti.hyu.backend.rest.dto.RestDto;
 import com.serengeti.hyu.backend.rest.entity.Rest;
-import com.serengeti.hyu.backend.rest.repository.RestRepository;
+
 import com.serengeti.hyu.backend.rest.service.RestService;
 import com.serengeti.hyu.backend.rest.service.ScrapService;
+
 import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
+import com.serengeti.hyu.backend.rest.repository.RestRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,21 +69,19 @@ public class RestController {
         }
     }
 
-
     // 쉼활동 저장
     @PostMapping("/{restId}/bookmark")
     public ResponseEntity<?> scrapRest(
             @PathVariable int restId,
-            @RequestParam Long userId) {
+            @AuthenticationPrincipal User user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
+        }
 
         Rest rest = restService.getRestById(restId);
         if (rest == null) {
             return ResponseEntity.notFound().build();
-        }
-
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("유저아이디가 없습니다!");
         }
 
         scrapService.addScrap(user, rest);
@@ -87,16 +92,14 @@ public class RestController {
     @DeleteMapping("/{restId}/bookmark")
     public ResponseEntity<?> removeScrap(
             @PathVariable int restId,
-            @RequestParam Long userId) {
+            @AuthenticationPrincipal User user) {
 
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
+        }
         Rest rest = restService.getRestById(restId);
         if (rest == null) {
             return ResponseEntity.notFound().build();
-        }
-
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("유저아이디가 없습니다!");
         }
 
         scrapService.removeScrap(user, rest);
