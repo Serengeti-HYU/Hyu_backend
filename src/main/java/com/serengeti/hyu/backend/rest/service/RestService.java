@@ -24,16 +24,16 @@ import java.util.stream.Collectors;
 @Service
 public class RestService {
 
-    @Value("${openApi.API_URL}")
+//    @Value("${openApi.API_URL}")
     private String apiUrl;
 
-    @Value("${openApi.key}")
+//    @Value("${openApi.key}")
     private String apiKey;
 
-    @Value("${openApi.serviceName}")
+//    @Value("${openApi.serviceName}")
     private String serviceName;
 
-    @Value("${openApi.dataType}")
+//    @Value("${openApi.dataType}")
     private String dataType;
 
     @Autowired

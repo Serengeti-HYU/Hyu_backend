@@ -1,5 +1,6 @@
 package com.serengeti.hyu.backend.user.service;
 
+import com.serengeti.hyu.backend.auth.dto.kakao.KakaoInfoResponse;
 import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
 import com.serengeti.hyu.backend.user.entity.User;
@@ -97,5 +98,19 @@ public class UserService {
         message.setText(text);
         mailSender.send(message);
     }
+    
+    //카카오로그인 기능
+    @Transactional
+    public String kakaoLogin(KakaoInfoResponse userInfo) {
+        String email = userInfo.getKakao_account().getEmail();
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = User.builder()
+                    .email(email)
+                    .name(userInfo.getKakao_account().getProfile().getNickname())
+                    .build();
+            return userRepository.save(newUser);
+        });
 
+        return jwtTokenUtil.generateToken(user);
+    }
 }
