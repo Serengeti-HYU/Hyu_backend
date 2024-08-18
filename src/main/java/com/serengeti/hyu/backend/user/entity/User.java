@@ -47,4 +47,7 @@ public class User {
 //    @OneToMany(mappedBy = "user")
 //    private List<Result> results;
 
+    //소셜로그인
+    private String provider;
+    private String providerId;
 }

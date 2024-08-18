@@ -10,6 +10,7 @@ import com.serengeti.hyu.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,17 +101,24 @@ public class UserService {
     }
     
     //카카오로그인 기능
-    @Transactional
-    public String kakaoLogin(KakaoInfoResponse userInfo) {
-        String email = userInfo.getKakao_account().getEmail();
-        User user = userRepository.findByEmail(email).orElseGet(() -> {
-            User newUser = User.builder()
-                    .email(email)
-                    .name(userInfo.getKakao_account().getProfile().getNickname())
-                    .build();
-            return userRepository.save(newUser);
-        });
+//    @Transactional
+//    public String kakaoLogin(KakaoInfoResponse userInfo) {
+//        String email = userInfo.getKakao_account().getEmail();
+//        User user = userRepository.findByEmail(email).orElseGet(() -> {
+//            User newUser = User.builder()
+//                    .email(email)
+//                    .name(userInfo.getKakao_account().getProfile().getNickname())
+//                    .build();
+//            return userRepository.save(newUser);
+//        });
+//
+//        return jwtTokenUtil.generateToken(user);
+//    }
 
+    public String generateToken(OAuth2User oAuth2User) {
+        String username = (String) oAuth2User.getAttributes().get("email");
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 사용자입니다."));
         return jwtTokenUtil.generateToken(user);
     }
 }

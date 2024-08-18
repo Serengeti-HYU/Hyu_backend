@@ -1,6 +1,8 @@
 package com.serengeti.hyu.backend.config;
 
+import com.serengeti.hyu.backend.auth.service.CustomOauth2UserService;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +21,8 @@ public class SecurityConfig  {
 
     private final JwtTokenUtil jwtTokenUtil;
     private final UserRepository userRepository;
+    @Autowired
+    private CustomOauth2UserService customOauth2UserService;
 
     public SecurityConfig(JwtTokenUtil jwtTokenUtil, UserRepository userRepository) {
         this.jwtTokenUtil = jwtTokenUtil;
@@ -38,19 +42,16 @@ public class SecurityConfig  {
                                 .requestMatchers("/**").permitAll() // 그 외 인증 없이 접근X
                         .anyRequest().authenticated()
                 )
+
+                .oauth2Login(oauth2Login -> oauth2Login
+                        .userInfoEndpoint(userInfoEndpoint ->
+                                userInfoEndpoint.userService(customOauth2UserService)
+                        )
+                        .defaultSuccessUrl("/user/loginSuccess", true)
+                )
                 .logout(logout ->
                         logout.logoutSuccessUrl("/")
                 );
-//                .oauth2Login(oauth2Login ->
-//                oauth2Login
-//                        .userInfoEndpoint(userInfoEndpoint ->
-//                                userInfoEndpoint.userService(oAuth2UserService())
-//                        )
-//                        .defaultSuccessUrl("/auth/loginSuccess")
-//        )
-//                .logout(logout ->
-//                        logout.logoutSuccessUrl("/")
-//                );
 
         return http.build();
     }

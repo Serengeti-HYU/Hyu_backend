@@ -1,26 +1,31 @@
 package com.serengeti.hyu.backend.auth.dto.kakao;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+import java.util.Map;
+
+@Data
 public class KakaoInfoResponse {
+    private String id;
+    private Map<String, Object> properties;
+    private KakaoAccount kakaoAccount;
 
-    private Long id;
-    private KakaoAccount kakao_account;
+    public static KakaoInfoResponse from(Map<String, Object> attributes) {
+        KakaoInfoResponse response = new KakaoInfoResponse();
+        response.setId(String.valueOf(attributes.get("id")));
+        response.setProperties((Map<String, Object>) attributes.get("properties"));
+        response.setKakaoAccount(KakaoAccount.from((Map<String, Object>) attributes.get("kakao_account")));
+        return response;
+    }
 
-    @Getter
-    @Setter
+    @Data
     public static class KakaoAccount {
         private String email;
-        private Profile profile;
 
-        @Getter
-        @Setter
-        public static class Profile {
-            private String nickname;
-
+        public static KakaoAccount from(Map<String, Object> attributes) {
+            KakaoAccount account = new KakaoAccount();
+            account.setEmail((String) attributes.get("email"));
+            return account;
         }
     }
 }
