@@ -29,7 +29,7 @@ public class User {
     private String phoneNumber;
     private String email;
 
-    // 
+    //
 //    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 //    private boolean isPremium = false;
 
