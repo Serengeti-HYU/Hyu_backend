@@ -1,7 +1,11 @@
 package com.serengeti.hyu.backend.user.controller;
 
+import com.serengeti.hyu.backend.news.dto.NewsRequest;
 import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
+import com.serengeti.hyu.backend.user.dto.UserAuthRequest;
+import com.serengeti.hyu.backend.user.dto.UserDto;
+import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -85,6 +89,16 @@ public class UserController {
 //        }
 //    }
 
-    
+    // 사용자 권한 확인
+    @PostMapping("info-auth")
+    public ResponseEntity<String> authorizationUser(@RequestBody UserAuthRequest request) {
+        return new ResponseEntity<>(userService.authorizationUser(request), HttpStatus.ACCEPTED);
+    }
+
+    // 사용자 기본 정보 수정
+    @PatchMapping("info-modify")
+    public ResponseEntity<User> modifyUserInfo(@RequestBody UserDto userInfo) {
+        return new ResponseEntity<>(userService.modifyUserInfo(userInfo), HttpStatus.OK);
+    }
 }
 
