@@ -15,8 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -104,5 +102,18 @@ public class RestController {
 
         scrapService.removeScrap(user, rest);
         return ResponseEntity.ok("스크랩이 취소되었습니다.");
+    }
+
+    // 쉼활동 공유링크 생성
+    @GetMapping("/{restId}/share")
+    public ResponseEntity<String> shareLink(@PathVariable int restId) {
+        Rest rest = restService.getRestById(restId);
+        if (rest == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 로컬 테스트용 URL -> 나중에 배포된 링크로 바꿔줄 것
+        String shareUrl = "http://localhost:8080/hue-activity/" + restId;
+        return ResponseEntity.ok(shareUrl);
     }
 }
