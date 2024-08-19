@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -90,15 +92,27 @@ public class UserController {
 //    }
 
     // 사용자 권한 확인
-    @PostMapping("info-auth")
-    public ResponseEntity<String> authorizationUser(@RequestBody UserAuthRequest request) {
-        return new ResponseEntity<>(userService.authorizationUser(request), HttpStatus.ACCEPTED);
+    @PostMapping("/info-auth")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> authorizationUser(@AuthenticationPrincipal User user, @RequestBody UserAuthRequest request) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
+        }
+
+        if (!user.getUsername().equals(request.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("권한이 없습니다.");
+        }
+        return userService.authorizationUser(user, request);
     }
 
     // 사용자 기본 정보 수정
-    @PatchMapping("info-modify")
-    public ResponseEntity<User> modifyUserInfo(@RequestBody UserDto userInfo) {
-        return new ResponseEntity<>(userService.modifyUserInfo(userInfo), HttpStatus.OK);
+    @PatchMapping("/info-modify")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<User> modifyUserInfo(@AuthenticationPrincipal User user, @RequestBody UserDto request) {
+        if (!user.getUsername().equals(request.getUsername())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        return new ResponseEntity<>(userService.modifyUserInfo(user, request), HttpStatus.OK);
     }
 }
 

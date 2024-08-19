@@ -10,6 +10,8 @@ import com.serengeti.hyu.backend.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -101,25 +103,19 @@ public class UserService {
     }
 
     // 사용자 인증
-    public String authorizationUser(UserAuthRequest authRequest) {
-        // 사용자 정보 조회
-        User user = userRepository.findByUsername(authRequest.getUsername())
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public ResponseEntity<String> authorizationUser(User user, UserAuthRequest authRequest) {
 
         // 비밀번호, 이메일 동시 검증
         if (passwordEncoder.matches(authRequest.getPassword(), user.getPassword()) &&
                 user.getEmail().equals(authRequest.getEmail())) {
-            return "인증 성공 : 사용자 인증 완료";
+            return new ResponseEntity<>("인증 성공 : 사용자 인증 완료", HttpStatus.OK);
         } else {
-            return "인증 실패: 비밀번호 또는 이메일 불일치";
+            return new ResponseEntity<>("인증 실패: 비밀번호 또는 이메일 불일치", HttpStatus.UNAUTHORIZED);
         }
     }
 
     // 사용자 정보 업데이트
-    public User modifyUserInfo(UserDto userDto) {
-
-        User user = userRepository.findByUsername(userDto.getUsername())
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    public User modifyUserInfo(User user, UserDto userDto) {
 
         // password encryption
         String encryptedPassword = passwordEncoder.encode(userDto.getPassword());
