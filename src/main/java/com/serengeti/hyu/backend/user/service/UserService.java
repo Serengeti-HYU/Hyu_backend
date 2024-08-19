@@ -2,6 +2,8 @@ package com.serengeti.hyu.backend.user.service;
 
 import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
+import com.serengeti.hyu.backend.user.dto.UserAuthRequest;
+import com.serengeti.hyu.backend.user.dto.UserDto;
 import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.config.JwtTokenUtil;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
@@ -98,4 +100,38 @@ public class UserService {
         mailSender.send(message);
     }
 
+    // 사용자 인증
+    public String authorizationUser(UserAuthRequest authRequest) {
+        // 사용자 정보 조회
+        User user = userRepository.findByUsername(authRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 비밀번호, 이메일 동시 검증
+        if (passwordEncoder.matches(authRequest.getPassword(), user.getPassword()) &&
+                user.getEmail().equals(authRequest.getEmail())) {
+            return "인증 성공 : 사용자 인증 완료";
+        } else {
+            return "인증 실패: 비밀번호 또는 이메일 불일치";
+        }
+    }
+
+    // 사용자 정보 업데이트
+    public User modifyUserInfo(UserDto userDto) {
+
+        User user = userRepository.findByUsername(userDto.getUsername())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // password encryption
+        String encryptedPassword = passwordEncoder.encode(userDto.getPassword());
+
+        // update
+        user.setPassword(encryptedPassword);
+        user.setEmail(userDto.getEmail());
+        user.setName(userDto.getName());
+        user.setBirth(userDto.getBirth());
+        user.setPhoneNumber(userDto.getPhoneNumber());
+
+        // save
+        return userRepository.save(user);
+    }
 }
