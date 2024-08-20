@@ -97,6 +97,7 @@ public class EmotionController {
         Date queryDate;
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            dateFormat.setLenient(false); // 엄격한 날짜 파싱
             queryDate = dateFormat.parse(recordDate);
         } catch (ParseException e) {
             return ResponseEntity.badRequest().body(null);
