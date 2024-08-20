@@ -39,14 +39,23 @@ public class RestController {
     @Autowired
     private UserRepository userRepository;
 
-    // 쉼활동 목록 조회
+    // 쉼활동 목록 조회 -> 성격유형검사의 여부에 따라서 결정됨
     @GetMapping("/recommend")
     public ResponseEntity<List<RestDto>> getCulturalEvents(
             @RequestParam(value = "start_index", defaultValue = "1") Integer startIndex,
-            @RequestParam(value = "end_index", defaultValue = "50") Integer endIndex) {
+            @RequestParam(value = "end_index", defaultValue = "50") Integer endIndex,
+            @AuthenticationPrincipal User user) {
 
         try {
-            restService.fetchAndSaveCulturalEventInfo(startIndex, endIndex, null, null, null);
+            boolean isRecommended = user.isPersonalityTest();
+            System.out.println("isRecommended: " + isRecommended);  //로그
+
+            restService.fetchAndSaveCulturalEventInfo(startIndex, endIndex, null, null, null, isRecommended);
+
+            // isRecommended가 true일 때는 빈 리스트를 반환
+            if (isRecommended) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
 
             List<RestDto> response = restService.getRestData();
             return ResponseEntity.ok(response);
@@ -55,6 +64,7 @@ public class RestController {
                     .body(Collections.emptyList());
         }
     }
+
 
     // 쉼활동 상세 조회
     @GetMapping("/{restId}")

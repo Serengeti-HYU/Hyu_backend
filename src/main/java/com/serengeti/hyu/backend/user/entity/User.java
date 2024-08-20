@@ -29,7 +29,9 @@ public class User {
     private String phoneNumber;
     private String email;
 
-    //
+    @Column(name="personality_test", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE") // 데이터베이스의 컬럼 이름에 맞추어 설정
+    private boolean isPersonalityTest = false; //
+
 //    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 //    private boolean isPremium = false;
 
@@ -37,6 +39,7 @@ public class User {
     @JsonIgnore //json 직렬화 되지 않게 함
     @OneToMany(mappedBy = "user")
     private List<Emotion> emotions;
+
 
 //    @OneToMany(mappedBy = "user")
 //    private List<Scrap> scraps;
