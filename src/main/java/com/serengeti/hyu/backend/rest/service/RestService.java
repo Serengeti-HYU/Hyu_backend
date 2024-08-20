@@ -143,15 +143,33 @@ public class RestService {
 
     // 데이터 조회 메서드 추가
     public List<RestDto> getRestData(Long userId) {
-        CharacterResponseDto characterResponse = characterService.getCharacterResult(userId);
-        ResultType resultType = characterResponse.getResultType();
+        // 성격유형이 없어도 일단은 목록조회는 되어야 하니
+        ResultType resultType = null;
+
+        try {
+            CharacterResponseDto characterResponse = characterService.getCharacterResult(userId);
+            if (characterResponse != null) {
+                resultType = characterResponse.getResultType();
+            }
+        } catch (RuntimeException e) {
+            // 성격 정보가 없는경우
+            resultType = null;
+        }
 
         List<Rest> events = restRepository.findAll();
 
-        // 성격 유형에 따라 목록 필터링
-        List<Rest> filteredEvents = events.stream()
-                .filter(event -> filterResult(event, resultType))
-                .collect(Collectors.toList());
+        // 성격 유형이 있는경우와 없는경우
+        List<Rest> filteredEvents;
+        if (resultType == null) {
+            filteredEvents = events; // 성격 유형이 없으면 전체 목록
+        } else {
+            filteredEvents = new ArrayList<>();
+            for (Rest event : events) {
+                if (filterResult(event, resultType)) {
+                    filteredEvents.add(event);
+                }
+            }
+        }
 
         return filteredEvents.stream()
                 .map(event -> {
