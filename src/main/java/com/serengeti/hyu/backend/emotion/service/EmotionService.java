@@ -85,11 +85,20 @@ public class EmotionService {
 
     @Transactional
     public List<EmotionResponseDto> getEmotionsByWeek(Long userId, Date date) {
+       //추가
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.setFirstDayOfWeek(Calendar.MONDAY);
 
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
         Date startDate = cal.getTime();
 
         cal.add(Calendar.DAY_OF_WEEK, 6);
@@ -100,14 +109,21 @@ public class EmotionService {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return emotions.stream()
                 .map(e -> EmotionResponseDto.builder()
+                        .username(e.getUser().getUsername())
                         .emotionImg(e.getEmotionImg())
                         .recordDate(dateFormat.format(e.getRecordDate()))
                         .build())
                 .collect(Collectors.toList());
     }
 
+
     @Transactional
     public Emotion getEmotionByDate(Long userId, Date date) {
+        //추가
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -124,4 +140,5 @@ public class EmotionService {
                 .findFirst()
                 .orElse(null);
     }
+
 }
