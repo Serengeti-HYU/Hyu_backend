@@ -2,10 +2,12 @@ package com.serengeti.hyu.backend.rest.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.serengeti.hyu.backend.character.dto.CharacterResponseDto;
+import com.serengeti.hyu.backend.character.enums.ResultType;
+import com.serengeti.hyu.backend.character.service.CharacterService;
 import com.serengeti.hyu.backend.rest.dto.RestDto;
 import com.serengeti.hyu.backend.rest.entity.Rest;
 import com.serengeti.hyu.backend.rest.repository.RestRepository;
-import com.serengeti.hyu.backend.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,10 @@ public class RestService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private CharacterService characterService;
+
 
     public void fetchAndSaveCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
         // API 호출
@@ -136,9 +142,18 @@ public class RestService {
 
 
     // 데이터 조회 메서드 추가
-    public List<RestDto> getRestData() {
+    public List<RestDto> getRestData(Long userId) {
+        CharacterResponseDto characterResponse = characterService.getCharacterResult(userId);
+        ResultType resultType = characterResponse.getResultType();
+
         List<Rest> events = restRepository.findAll();
-        return events.stream()
+
+        // 성격 유형에 따라 목록 필터링
+        List<Rest> filteredEvents = events.stream()
+                .filter(event -> filterResult(event, resultType))
+                .collect(Collectors.toList());
+
+        return filteredEvents.stream()
                 .map(event -> {
                     RestDto dto = new RestDto();
                     dto.setRestId(event.getRestId());
@@ -153,10 +168,30 @@ public class RestService {
                 .collect(Collectors.toList());
     }
 
-
     // 상세 조회
     public Rest getRestById(int restId) {
         return restRepository.findById(restId).orElse(null);
     }
 
+
+    // 성격 유형에 따라 카테고리 필터링
+    private boolean filterResult(Rest event, ResultType resultType) {
+        switch (resultType) {
+            case RESULT_1: // 휴일은 하우스키퍼 유형
+                return event.getCategory().equals("기타") ||
+                        event.getCategory().equals("독주/독창회");
+            case RESULT_2: // 액티브하게 휴식 유형
+                return event.getCategory().equals("교육/체험") ||
+                        event.getCategory().equals("축제-기타") ||
+                        event.getCategory().equals("축제-문화/예술");
+            case RESULT_3: // 스트레스 OUT! 힐링 유형
+                return event.getCategory().equals("클래식") ||
+                        event.getCategory().equals("독주/독창회") ||
+                        event.getCategory().equals("연극");
+            case RESULT_4: // 지겹지 않게 항상 다른 휴식 유형
+                return true; // 모든 쉼활동
+            default:
+                return true;
+        }
+    }
 }

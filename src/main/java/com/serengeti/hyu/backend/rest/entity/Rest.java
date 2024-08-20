@@ -18,6 +18,8 @@ public class Rest {
     private String description;
     private String category; // 카테고리 어케하지..?
     private String image;
+
+    @Column(length = 1000)
     private String link;
     private String place; // 장소추가해야될듯
 }
