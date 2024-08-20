@@ -29,7 +29,6 @@ public class User {
     private String phoneNumber;
     private String email;
 
-    //
 //    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 //    private boolean isPremium = false;
 
@@ -37,6 +36,7 @@ public class User {
     @JsonIgnore //json 직렬화 되지 않게 함
     @OneToMany(mappedBy = "user")
     private List<Emotion> emotions;
+
 
 //    @OneToMany(mappedBy = "user")
 //    private List<Scrap> scraps;

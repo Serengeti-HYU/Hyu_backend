@@ -15,8 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,22 +39,25 @@ public class RestController {
     @Autowired
     private UserRepository userRepository;
 
-    // 쉼활동 목록 조회
+    // 쉼활동 목록 조회 -> 성격유형검사의 여부에 따라서 결정됨
     @GetMapping("/recommend")
     public ResponseEntity<List<RestDto>> getCulturalEvents(
             @RequestParam(value = "start_index", defaultValue = "1") Integer startIndex,
-            @RequestParam(value = "end_index", defaultValue = "50") Integer endIndex) {
+            @RequestParam(value = "end_index", defaultValue = "80") Integer endIndex,
+            @AuthenticationPrincipal User user) {
 
         try {
             restService.fetchAndSaveCulturalEventInfo(startIndex, endIndex, null, null, null);
 
-            List<RestDto> response = restService.getRestData();
+
+            List<RestDto> response = restService.getRestData(user.getUserId());
             return ResponseEntity.ok(response);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Collections.emptyList());
         }
     }
+
 
     // 쉼활동 상세 조회
     @GetMapping("/{restId}")
@@ -104,5 +105,18 @@ public class RestController {
 
         scrapService.removeScrap(user, rest);
         return ResponseEntity.ok("스크랩이 취소되었습니다.");
+    }
+
+    // 쉼활동 공유링크 생성
+    @GetMapping("/{restId}/share")
+    public ResponseEntity<String> shareLink(@PathVariable int restId) {
+        Rest rest = restService.getRestById(restId);
+        if (rest == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 로컬 테스트용 URL -> 나중에 배포된 링크로 바꿔줄 것
+        String shareUrl = "http://localhost:8080/hue-activity/" + restId;
+        return ResponseEntity.ok(shareUrl);
     }
 }

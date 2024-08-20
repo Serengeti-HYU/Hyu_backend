@@ -2,6 +2,9 @@ package com.serengeti.hyu.backend.rest.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.serengeti.hyu.backend.character.dto.CharacterResponseDto;
+import com.serengeti.hyu.backend.character.enums.ResultType;
+import com.serengeti.hyu.backend.character.service.CharacterService;
 import com.serengeti.hyu.backend.rest.dto.RestDto;
 import com.serengeti.hyu.backend.rest.entity.Rest;
 import com.serengeti.hyu.backend.rest.repository.RestRepository;
@@ -42,6 +45,10 @@ public class RestService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private CharacterService characterService;
+
+
     public void fetchAndSaveCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
         // API 호출
         String openAPI = fetchEvent(startIndex, endIndex, codename, title, date);
@@ -49,7 +56,7 @@ public class RestService {
         // OpenAPI(JSON) -> DTO 변환
         List<RestDto> dtoList = parseJson(openAPI);
 
-        // DTO -> 엔티티 저장
+        // DTO -> 엔티티 저장 -> 여기서 데이터 저장이 나뉨
         saveRestData(dtoList);
     }
 
@@ -116,7 +123,7 @@ public class RestService {
         return dtoList;
     }
 
-    private void saveRestData(List<RestDto> dtoList) {
+    private void saveRestData(List<RestDto> dtoList){
         List<Rest> restList = dtoList.stream()
                 .filter(dto -> !restRepository.existsByRestName(dto.getRestName()))
                 .map(dto -> {
@@ -135,9 +142,36 @@ public class RestService {
 
 
     // 데이터 조회 메서드 추가
-    public List<RestDto> getRestData() {
+    public List<RestDto> getRestData(Long userId) {
+        // 성격유형이 없어도 일단은 목록조회는 되어야 하니
+        ResultType resultType = null;
+
+        try {
+            CharacterResponseDto characterResponse = characterService.getCharacterResult(userId);
+            if (characterResponse != null) {
+                resultType = characterResponse.getResultType();
+            }
+        } catch (RuntimeException e) {
+            // 성격 정보가 없는경우
+            resultType = null;
+        }
+
         List<Rest> events = restRepository.findAll();
-        return events.stream()
+
+        // 성격 유형이 있는경우와 없는경우
+        List<Rest> filteredEvents;
+        if (resultType == null) {
+            filteredEvents = events; // 성격 유형이 없으면 전체 목록
+        } else {
+            filteredEvents = new ArrayList<>();
+            for (Rest event : events) {
+                if (filterResult(event, resultType)) {
+                    filteredEvents.add(event);
+                }
+            }
+        }
+
+        return filteredEvents.stream()
                 .map(event -> {
                     RestDto dto = new RestDto();
                     dto.setRestId(event.getRestId());
@@ -155,5 +189,27 @@ public class RestService {
     // 상세 조회
     public Rest getRestById(int restId) {
         return restRepository.findById(restId).orElse(null);
+    }
+
+
+    // 성격 유형에 따라 카테고리 필터링
+    private boolean filterResult(Rest event, ResultType resultType) {
+        switch (resultType) {
+            case RESULT_1: // 휴일은 하우스키퍼 유형
+                return event.getCategory().equals("기타") ||
+                        event.getCategory().equals("독주/독창회");
+            case RESULT_2: // 액티브하게 휴식 유형
+                return event.getCategory().equals("교육/체험") ||
+                        event.getCategory().equals("축제-기타") ||
+                        event.getCategory().equals("축제-문화/예술");
+            case RESULT_3: // 스트레스 OUT! 힐링 유형
+                return event.getCategory().equals("클래식") ||
+                        event.getCategory().equals("독주/독창회") ||
+                        event.getCategory().equals("연극");
+            case RESULT_4: // 지겹지 않게 항상 다른 휴식 유형
+                return true; // 모든 쉼활동
+            default:
+                return true;
+        }
     }
 }
