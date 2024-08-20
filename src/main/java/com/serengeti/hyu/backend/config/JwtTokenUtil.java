@@ -20,7 +20,7 @@ public class JwtTokenUtil {
     private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
 
     public JwtTokenUtil() {
-        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256); // 생성 시 비밀키 설정
     }
 
     public String getUsernameFromToken(String token) {
@@ -38,7 +38,7 @@ public class JwtTokenUtil {
 
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+                .setSigningKey(secretKey) // 비밀키 설정
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -67,7 +67,7 @@ public class JwtTokenUtil {
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
-                .signWith(secretKey)
+                .signWith(secretKey) // 비밀키 사용
                 .compact();
     }
 

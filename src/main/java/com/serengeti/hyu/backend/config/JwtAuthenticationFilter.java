@@ -2,12 +2,10 @@ package com.serengeti.hyu.backend.config;
 
 import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,10 +51,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws IOException, ServletException {
         String token = resolveToken(request);
         if (token != null) {
-            User user = userRepository.findByUsername(jwtTokenUtil.getUsernameFromToken(token)).orElse(null);
-            if (user != null && jwtTokenUtil.validateToken(token, user)) {
-                Authentication authentication = getAuthentication(token);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                User user = userRepository.findByUsername(jwtTokenUtil.getUsernameFromToken(token)).orElse(null);
+                if (user != null && jwtTokenUtil.validateToken(token, user)) {
+                    Authentication authentication = getAuthentication(token);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            } catch (Exception e) {
+                logger.error("JWT token validation error: {}", e.getMessage());
             }
         }
         filterChain.doFilter(request, response);
