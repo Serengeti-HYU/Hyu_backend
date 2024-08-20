@@ -46,7 +46,7 @@ public class EmotionService {
 
         Emotion emotion = Emotion.builder()
                 .user(user)
-                .emotionImg(request.getEmotionImg())
+                .emotionImg(request.getEmotionImg()) // "/images/happy.png" 형태의 경로 저장
                 .content(request.getContent())
                 .recordDate(new Date())
                 .build();
