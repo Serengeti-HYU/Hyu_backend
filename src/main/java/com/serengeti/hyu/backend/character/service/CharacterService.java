@@ -32,8 +32,7 @@ public class CharacterService {
     @Transactional
     public CharacterResponseDto getCharacterResult(Long userId) {
         Character character = findCharacterByUserId(userId);
-        Map<Question, ResponseOption> responses = character.getResponses();
-        ResultType resultType = calculateResultType(responses);
+        ResultType resultType = character.getResultType();
 
         return new CharacterResponseDto(userId, resultType);
     }
@@ -90,7 +89,7 @@ public class CharacterService {
                 .orElse(ResultType.RESULT_1); // 기본값 (실제 구현 시 변경 필요)
     }
 
-    public Character findCharacterByUserId(Long userId) {
+    private Character findCharacterByUserId(Long userId) {
         // User 엔티티를 userId로 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
