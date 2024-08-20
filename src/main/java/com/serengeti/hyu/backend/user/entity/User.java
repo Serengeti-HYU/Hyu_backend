@@ -1,6 +1,7 @@
 package com.serengeti.hyu.backend.user.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.serengeti.hyu.backend.emotion.entity.Emotion;
 import jakarta.persistence.*;
 
@@ -28,11 +29,12 @@ public class User {
     private String phoneNumber;
     private String email;
 
-    // 
+    //
 //    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 //    private boolean isPremium = false;
 
 
+    @JsonIgnore //json 직렬화 되지 않게 함
     @OneToMany(mappedBy = "user")
     private List<Emotion> emotions;
 
