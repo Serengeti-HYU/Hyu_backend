@@ -47,15 +47,8 @@ public class RestController {
             @AuthenticationPrincipal User user) {
 
         try {
-            boolean isRecommended = user.isPersonalityTest();
-            System.out.println("isRecommended: " + isRecommended);  //로그
+            restService.fetchAndSaveCulturalEventInfo(startIndex, endIndex, null, null, null);
 
-            restService.fetchAndSaveCulturalEventInfo(startIndex, endIndex, null, null, null, isRecommended);
-
-            // isRecommended가 true일 때는 빈 리스트를 반환
-            if (isRecommended) {
-                return ResponseEntity.ok(Collections.emptyList());
-            }
 
             List<RestDto> response = restService.getRestData();
             return ResponseEntity.ok(response);

@@ -43,7 +43,7 @@ public class RestService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void fetchAndSaveCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date, boolean isRecommended) throws IOException {
+    public void fetchAndSaveCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
         // API 호출
         String openAPI = fetchEvent(startIndex, endIndex, codename, title, date);
 
@@ -51,7 +51,7 @@ public class RestService {
         List<RestDto> dtoList = parseJson(openAPI);
 
         // DTO -> 엔티티 저장 -> 여기서 데이터 저장이 나뉨
-        saveRestData(dtoList, isRecommended);
+        saveRestData(dtoList);
     }
 
     private String fetchEvent(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
@@ -117,7 +117,7 @@ public class RestService {
         return dtoList;
     }
 
-    private void saveRestData(List<RestDto> dtoList, boolean isRecommended){
+    private void saveRestData(List<RestDto> dtoList){
         List<Rest> restList = dtoList.stream()
                 .filter(dto -> !restRepository.existsByRestName(dto.getRestName()))
                 .map(dto -> {
