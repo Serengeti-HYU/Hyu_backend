@@ -43,14 +43,14 @@ public class RestController {
     @GetMapping("/recommend")
     public ResponseEntity<List<RestDto>> getCulturalEvents(
             @RequestParam(value = "start_index", defaultValue = "1") Integer startIndex,
-            @RequestParam(value = "end_index", defaultValue = "50") Integer endIndex,
+            @RequestParam(value = "end_index", defaultValue = "80") Integer endIndex,
             @AuthenticationPrincipal User user) {
 
         try {
             restService.fetchAndSaveCulturalEventInfo(startIndex, endIndex, null, null, null);
 
 
-            List<RestDto> response = restService.getRestData();
+            List<RestDto> response = restService.getRestData(user.getUserId());
             return ResponseEntity.ok(response);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
