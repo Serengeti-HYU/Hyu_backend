@@ -9,8 +9,10 @@ import com.serengeti.hyu.backend.character.enums.ResultType;
 import com.serengeti.hyu.backend.character.repository.CharacterRepository;
 import com.serengeti.hyu.backend.user.entity.User;
 import com.serengeti.hyu.backend.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,7 @@ public class CharacterService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public CharacterResponseDto getCharacterResult(Long userId) {
         Character character = findCharacterByUserId(userId);
         Map<Question, ResponseOption> responses = character.getResponses();
@@ -36,6 +39,11 @@ public class CharacterService {
     }
 
     public CharacterResponseDto saveCharacter(CharacterRequestDto requestDto) {
+        // 10개의 질문에 모두 답변이 되어 있는지 확인
+        if (CollectionUtils.isEmpty(requestDto.getResponses()) || requestDto.getResponses().size() < 10) {
+            throw new IllegalArgumentException("All 10 questions must be answered.");
+        }
+
         User user = userRepository.findById(requestDto.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
