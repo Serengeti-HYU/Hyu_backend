@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.serengeti.hyu.backend.rest.dto.RestDto;
 import com.serengeti.hyu.backend.rest.entity.Rest;
 import com.serengeti.hyu.backend.rest.repository.RestRepository;
+import com.serengeti.hyu.backend.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,15 +43,15 @@ public class RestService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void fetchAndSaveCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
+    public void fetchAndSaveCulturalEventInfo(Integer startIndex, Integer endIndex, String codename, String title, String date, boolean isRecommended) throws IOException {
         // API 호출
         String openAPI = fetchEvent(startIndex, endIndex, codename, title, date);
 
         // OpenAPI(JSON) -> DTO 변환
         List<RestDto> dtoList = parseJson(openAPI);
 
-        // DTO -> 엔티티 저장
-        saveRestData(dtoList);
+        // DTO -> 엔티티 저장 -> 여기서 데이터 저장이 나뉨
+        saveRestData(dtoList, isRecommended);
     }
 
     private String fetchEvent(Integer startIndex, Integer endIndex, String codename, String title, String date) throws IOException {
@@ -116,7 +117,7 @@ public class RestService {
         return dtoList;
     }
 
-    private void saveRestData(List<RestDto> dtoList) {
+    private void saveRestData(List<RestDto> dtoList, boolean isRecommended){
         List<Rest> restList = dtoList.stream()
                 .filter(dto -> !restRepository.existsByRestName(dto.getRestName()))
                 .map(dto -> {
@@ -152,8 +153,10 @@ public class RestService {
                 .collect(Collectors.toList());
     }
 
+
     // 상세 조회
     public Rest getRestById(int restId) {
         return restRepository.findById(restId).orElse(null);
     }
+
 }

@@ -14,4 +14,5 @@ public class UserDto {
     private String password;
     private String phoneNumber;
     private String email;
+    private boolean isPersonalityTest;
 }
