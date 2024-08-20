@@ -1,6 +1,7 @@
 package com.serengeti.hyu.backend.emotion.service;
 
 import com.serengeti.hyu.backend.emotion.dto.EmotionDto;
+import com.serengeti.hyu.backend.emotion.dto.EmotionResponseDto;
 import com.serengeti.hyu.backend.emotion.entity.Emotion;
 import com.serengeti.hyu.backend.emotion.exception.EmotionAlreadyExistsException;
 import com.serengeti.hyu.backend.emotion.repository.EmotionRepository;
@@ -11,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EmotionService {
@@ -74,13 +77,12 @@ public class EmotionService {
         return emotionRepository.save(updatedEmotion);
     }
 
+
     @Transactional
-    // 특정 날짜를 기준으로 그 주의 감정 기록을 조회하는 메서드 추가
-    public List<Emotion> getEmotionsByWeek(Long userId, Date date) {
+    public List<EmotionResponseDto> getEmotionsByWeek(Long userId, Date date) {
+        // 주의 첫날과 마지막 날을 계산
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-
-        // 주의 첫날을 월요일로 명시적으로 설정
         cal.setFirstDayOfWeek(Calendar.MONDAY);
 
         // 해당 주의 시작일 (월요일)
@@ -91,8 +93,20 @@ public class EmotionService {
         cal.add(Calendar.DAY_OF_WEEK, 6);
         Date endDate = cal.getTime();
 
-        return emotionRepository.findByUser_UserIdAndRecordDateBetween(userId, startDate, endDate);
+        // Emotion 엔터티 리스트를 가져옴
+        List<Emotion> emotions = emotionRepository.findByUser_UserIdAndRecordDateBetween(userId, startDate, endDate);
+
+        // Emotion 엔터티 리스트를 EmotionResponseDto 리스트로 변환
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return emotions.stream()
+                .map(emotion -> new EmotionResponseDto(
+                        emotion.getUser().getUsername(),
+                        emotion.getEmotionImg(),
+                        dateFormat.format(emotion.getRecordDate())
+                ))
+                .collect(Collectors.toList());
     }
+
 
     @Transactional
     //게시글 상세조회

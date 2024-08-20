@@ -1,6 +1,8 @@
 package com.serengeti.hyu.backend.emotion.controller;
 
+import com.serengeti.hyu.backend.emotion.dto.EmotionDetailResponseDto;
 import com.serengeti.hyu.backend.emotion.dto.EmotionDto;
+import com.serengeti.hyu.backend.emotion.dto.EmotionResponseDto;
 import com.serengeti.hyu.backend.emotion.entity.Emotion;
 import com.serengeti.hyu.backend.emotion.exception.EmotionAlreadyExistsException;
 import com.serengeti.hyu.backend.emotion.service.EmotionService;
@@ -30,27 +32,49 @@ public class EmotionController {
     private UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<Emotion> createEmotion(@RequestBody EmotionDto request, @AuthenticationPrincipal User user) {
+    public ResponseEntity<String> createEmotion(@RequestBody EmotionDto request, @AuthenticationPrincipal User user) {
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // 사용자 인증 실패
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authorized"); // 사용자 인증 실패 메시지
         }
         Long userId = user.getUserId();
-        Emotion emotion = emotionService.createEmotion(userId, request);
-        return ResponseEntity.ok(emotion);
+        emotionService.createEmotion(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Emotion record created successfully"); // 성공 메시지 반환
     }
 
+
+//    @PatchMapping("/{recordId}")
+//    public ResponseEntity<Emotion> updateEmotion(@PathVariable int recordId, @RequestBody EmotionDto request, @AuthenticationPrincipal User user) {
+//        if (user == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // 사용자 인증 실패
+//        }
+//        Long userId = user.getUserId();
+//        Emotion emotion = emotionService.updateEmotion(userId, recordId, request);
+//        return ResponseEntity.ok(emotion);
+//    }
+
+
     @PatchMapping("/{recordId}")
-    public ResponseEntity<Emotion> updateEmotion(@PathVariable int recordId, @RequestBody EmotionDto request, @AuthenticationPrincipal User user) {
+    public ResponseEntity<EmotionDetailResponseDto> updateEmotion(@PathVariable int recordId, @RequestBody EmotionDto request, @AuthenticationPrincipal User user) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // 사용자 인증 실패
         }
         Long userId = user.getUserId();
         Emotion emotion = emotionService.updateEmotion(userId, recordId, request);
-        return ResponseEntity.ok(emotion);
+
+        // EmotionDetailResponseDto로 변환하여 반환
+        EmotionDetailResponseDto responseDto = EmotionDetailResponseDto.builder()
+                .username(emotion.getUser().getUsername())
+                .content(emotion.getContent())
+                .emotionImg(emotion.getEmotionImg())
+                .recordDate(emotion.getRecordDate().toString()) // Date를 String으로 변환
+                .build();
+
+        return ResponseEntity.ok(responseDto);
     }
 
+
     @GetMapping
-    public ResponseEntity<List<Emotion>> getEmotions(@RequestParam(required = false) String date, @AuthenticationPrincipal User user) {
+    public ResponseEntity<List<EmotionResponseDto>> getEmotions(@RequestParam(required = false) String date, @AuthenticationPrincipal User user) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // 사용자 인증 실패
         }
@@ -67,9 +91,11 @@ public class EmotionController {
             }
         }
 
-        List<Emotion> emotions = emotionService.getEmotionsByWeek(userId, queryDate);
+        List<EmotionResponseDto> emotions = emotionService.getEmotionsByWeek(userId, queryDate);
         return ResponseEntity.ok(emotions);
     }
+
+
 
     @GetMapping("/detail")
     public ResponseEntity<Emotion> getEmotionByDate(@RequestParam String date, @AuthenticationPrincipal User user) {
