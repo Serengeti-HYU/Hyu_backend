@@ -55,6 +55,14 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	// Jakarta Bean Validation
+	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+
+	// Hibernate Validator (Bean Validation 구현체)
+	implementation 'org.hibernate.validator:hibernate-validator:7.0.1.Final'
+
+	// JSR 305 annotations for validation
+	implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
 }
 

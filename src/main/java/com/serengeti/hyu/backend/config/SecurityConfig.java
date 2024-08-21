@@ -36,7 +36,7 @@ public class SecurityConfig  {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-//                        .requestMatchers("/user/signup","/oauth2/**", "/user/login").permitAll()
+                        .requestMatchers("/user/signup", "/user/login").permitAll()
                                 .requestMatchers("/**").permitAll() // 그 외 인증 없이 접근X
                         .anyRequest().authenticated()
                 )
