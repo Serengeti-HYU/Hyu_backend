@@ -1,6 +1,5 @@
 package com.serengeti.hyu.backend.user.controller;
 
-import com.serengeti.hyu.backend.news.dto.NewsRequest;
 import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
 import com.serengeti.hyu.backend.user.dto.UserAuthRequest;
@@ -11,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -90,6 +91,12 @@ public class UserController {
 //            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 //        }
 //    }
+
+    //소셜로그인
+    @GetMapping("/loginSuccess")
+    public ResponseEntity<String> loginSuccess(@AuthenticationPrincipal OAuth2User oauthUser) {
+        return ResponseEntity.ok("OAuth2 로그인 성공");
+    }
 
     // 사용자 권한 확인
     @PostMapping("/info-auth")

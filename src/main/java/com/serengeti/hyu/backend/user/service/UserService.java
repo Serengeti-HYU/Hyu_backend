@@ -1,5 +1,7 @@
 package com.serengeti.hyu.backend.user.service;
 
+import com.serengeti.hyu.backend.auth.dto.kakao.KakaoInfoResponse;
+import com.serengeti.hyu.backend.auth.service.CustomOauth2UserDetails;
 import com.serengeti.hyu.backend.user.dto.LoginDto;
 import com.serengeti.hyu.backend.user.dto.SignUpDto;
 import com.serengeti.hyu.backend.user.dto.UserAuthRequest;
@@ -13,11 +15,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -32,7 +36,7 @@ public class UserService {
 
     //회원가입
     @Transactional
-    public void signUp(SignUpDto signUpDto){
+    public void signUp(SignUpDto signUpDto) {
         String encryptedPassword = passwordEncoder.encode(signUpDto.getPassword());
         User newUser = User.builder()
                 .name(signUpDto.getName())
@@ -69,11 +73,11 @@ public class UserService {
     public void sendTemporaryPassword(String username, String name, String email) {
         User user = userRepository.findByUsernameAndNameAndEmail(username, name, email)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-     //임시비밀번호생성
+        //임시비밀번호생성
         String temporaryPassword = generateTemporaryPassword();
         user.setPassword(passwordEncoder.encode(temporaryPassword));
         userRepository.save(user);
-        sendFindEmail(user.getEmail(), "휴 임시 비밀번호 발송 메일입니다", "임시 비밀번호는 " + temporaryPassword + "입니다."+"로그인 후 비밀번호 재설정해주세요");
+        sendFindEmail(user.getEmail(), "휴 임시 비밀번호 발송 메일입니다", "임시 비밀번호는 " + temporaryPassword + "입니다." + "로그인 후 비밀번호 재설정해주세요");
 
     }
 
@@ -131,3 +135,4 @@ public class UserService {
         return userRepository.save(user);
     }
 }
+

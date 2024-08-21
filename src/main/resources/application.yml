@@ -7,6 +7,8 @@ spring:
   output:
     ansi:
       enabled: always
+  config:
+    import: classpath:application-secret.yml
   datasource:
     url: jdbc:mysql://localhost:3306/hue
     username: root
@@ -17,5 +19,3 @@ spring:
       hibernate:
         ddl-auto: update
       dialect: org.hibernate.dialect.MySQL8Dialect
-  config:
-    import: classpath:application-secret.yml
