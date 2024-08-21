@@ -14,24 +14,22 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig  {
 
-    private final JwtTokenUtil jwtTokenUtil;
-    private final UserRepository userRepository;
-    @Autowired
-    private CustomOauth2UserService customOauth2UserService;
 
-    public SecurityConfig(JwtTokenUtil jwtTokenUtil, UserRepository userRepository) {
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.userRepository = userRepository;
+    private  UserRepository userRepository;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomOauth2UserService customOauth2UserService;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, CustomOauth2UserService customOauth2UserService) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.customOauth2UserService = customOauth2UserService;
     }
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtTokenUtil, userRepository);
-    }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -42,13 +40,13 @@ public class SecurityConfig  {
                                 .requestMatchers("/**").permitAll() // 그 외 인증 없이 접근X
                         .anyRequest().authenticated()
                 )
-
-                .oauth2Login(oauth2Login -> oauth2Login
-                        .userInfoEndpoint(userInfoEndpoint ->
-                                userInfoEndpoint.userService(customOauth2UserService)
+                .oauth2Login(oauth2 -> oauth2 //소셜로그인
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOauth2UserService)
                         )
                         .defaultSuccessUrl("/user/loginSuccess", true)
                 )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->
                         logout.logoutSuccessUrl("/")
                 );

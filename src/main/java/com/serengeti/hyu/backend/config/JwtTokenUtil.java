@@ -49,17 +49,14 @@ public class JwtTokenUtil {
         return expiration.before(new Date());
     }
 
-    public String generateToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, username);
-    }
 
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("email", user.getEmail());
+        claims.put("email", user.getEmail() != null ? user.getEmail() : "");
         claims.put("phone", user.getPhoneNumber());
         return doGenerateToken(claims, user.getUsername());
     }
+
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
@@ -71,14 +68,11 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    // User 객체를 인자로 받는 validateToken 메서드 추가
+
     public Boolean validateToken(String token, User user) {
         final String usernameFromToken = getUsernameFromToken(token);
         return (usernameFromToken.equals(user.getUsername()) && !isTokenExpired(token));
     }
 
-    public Boolean validateToken(String token, String username) {
-        final String usernameFromToken = getUsernameFromToken(token);
-        return (usernameFromToken.equals(username) && !isTokenExpired(token));
-    }
+
 }
