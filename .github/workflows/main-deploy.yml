@@ -36,6 +36,12 @@ jobs:
           echo "${{ secrets.APPLICATION }}" > ./application.yml
         shell: bash
         
+      - name: Make application_secret.yml
+        run: |
+          touch ./application-secret.yml
+          echo "${{ secrets.APPLICATION_SECRET }}" > ./application-secret.yml
+        shell: bash
+     
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
