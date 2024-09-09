@@ -36,8 +36,9 @@ jobs:
           echo "${{ secrets.APPLICATION }}" > ./application.yml
         shell: bash
         
-      - name: Make application_secret.yml
+      - name: Make application-secret.yml
         run: |
+          cd ./src/main/resources
           touch ./application-secret.yml
           echo "${{ secrets.APPLICATION_SECRET }}" > ./application-secret.yml
         shell: bash
@@ -46,7 +47,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --continue
         
       - name: Make zip file
         run: |
