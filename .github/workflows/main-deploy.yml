@@ -67,3 +67,5 @@ jobs:
           aws s3 cp \
             --region ap-northeast-2 \
             ./spring-build.zip arn:aws:s3:::hyu-backend-bucket
+      - name: Upload to S3
+        run: aws cloudfront create-invalidation -- distribution-id ${{ secrets.AWS_DISTRIBUTION_ID}}
