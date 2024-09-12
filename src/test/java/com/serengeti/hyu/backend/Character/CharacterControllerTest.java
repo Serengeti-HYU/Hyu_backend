@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.HashMap;
@@ -41,14 +42,17 @@ public class CharacterControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockBean
     private UserRepository userRepository;
 
     @MockBean
     private CharacterService characterService;
 
-    @InjectMocks
-    private CharacterController characterController;
+//    @InjectMocks
+//    private CharacterController characterController;
 
     private User testUser;
 
@@ -85,9 +89,9 @@ public class CharacterControllerTest {
         when(characterService.getCharacterResult(anyLong())).thenReturn(responseDto);
 
         // Test POST /hue-test/result
-        mockMvc.perform(post("/hue-test/result")
+        mockMvc.perform(MockMvcRequestBuilders.post("/hue-test/result")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(requestDto)))
+                        .content(objectMapper.writeValueAsString(requestDto))) // objectMapper 사용
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(1L))
                 .andExpect(jsonPath("$.resultType").value(ResultType.RESULT_2.name()))
@@ -95,7 +99,7 @@ public class CharacterControllerTest {
                 .andExpect(jsonPath("$.description").value(ResultType.RESULT_2.getDescription()));
 
         // Test GET /hue-test/result/{userId}
-        mockMvc.perform(get("/hue-test/result/1"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/hue-test/result/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(1L))
                 .andExpect(jsonPath("$.resultType").value(ResultType.RESULT_2.name()))
