@@ -1,4 +1,5 @@
 resources/application-secret.yml
+resources/applicatio.yml
 src/main/resources/application-secret.yml
 src/main/resources/application.yml
 
