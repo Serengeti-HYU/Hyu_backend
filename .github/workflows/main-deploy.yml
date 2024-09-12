@@ -53,7 +53,7 @@ jobs:
         run: |
           mkdir deploy
           cp ./build/libs/*.jar ./deploy/
-          zip -r -qq -j ./spring-build.zip ./deploy
+          zip -r -qq -j ./hyu-server-build.zip ./deploy
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -64,8 +64,7 @@ jobs:
         
       - name: Upload to S3
         run: |
-          aws s3 cp \
-            --region ap-northeast-2 \
-            ./spring-build.zip arn:aws:s3:::hyu-backend-bucket
-      - name: Upload to S3
+          aws s3 cp ./my-app-build.zip s3://hyu-backend-bucket/hyu-server-build.zip
+    
+      - name: Invalidate CloudFront Cache
         run: aws cloudfront create-invalidation -- distribution-id ${{ secrets.AWS_DISTRIBUTION_ID}}
