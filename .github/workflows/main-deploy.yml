@@ -64,7 +64,7 @@ jobs:
         
       - name: Upload to S3
         run: |
-          aws s3 cp ./my-app-build.zip s3://hyu-backend-bucket/hyu-server-build.zip
+          aws s3 cp ./hyu-server-build.zip s3://hyu-backend-bucket/hyu-server-build.zip
     
       - name: Invalidate CloudFront Cache
         run: aws cloudfront create-invalidation -- distribution-id ${{ secrets.AWS_DISTRIBUTION_ID}}
