@@ -69,3 +69,9 @@ jobs:
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/*"
+      
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name hyu-deploy
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name hyu-deploy-group
+          --s3-location bucket=tcat-spring,bundleType=zip,key=hyu-server-build.zip
