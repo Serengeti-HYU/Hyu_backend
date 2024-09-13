@@ -74,4 +74,4 @@ jobs:
         run: aws deploy create-deployment --application-name hyu-deploy
           --deployment-config-name CodeDeployDefault.OneAtATime
           --deployment-group-name hyu-deploy-group
-          --s3-location bucket=tcat-spring,bundleType=zip,key=hyu-server-build.zip
+          --s3-location bucket=hyu-backend-bucket,bundleType=zip,key=hyu-server-build.zip
