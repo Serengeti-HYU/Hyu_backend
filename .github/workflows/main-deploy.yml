@@ -1,16 +1,28 @@
-name: Deploy to Production
+name: Deploy to Amazon EC2
 
 on:
   push:
     branches:
       - main
 
+env:
+  AWS_REGION: ap-northeast-2
+  S3_BUCKET_NAME: hyu-backend-bucket
+  CODE_DEPLOY_APPLICATION_NAME: hyu-deploy
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: hyu-codedploy-deployment-group
+
+permissions:
+  contents: read
+      
+
 jobs:
   deploy:
+    name: Deploy
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - name: Checkout source code
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Set up JDK 17
@@ -47,7 +59,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build --continue
+        uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+        with:
+          arguments: clean build -x test
         
       - name: Make zip file
         run: |
