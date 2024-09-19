@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  AWS_REGION: ${{ env.AWS_REGION }}
+  AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: hyu-backend-bucket
   CODE_DEPLOY_APPLICATION_NAME: hyu-deploy
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: hyu-codedploy-deployment-group
@@ -18,7 +18,6 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: HYU-application
 
     steps:
       - name: Checkout
@@ -73,12 +72,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ap-northeast-2
         
       - name: Upload to AWS S3
         run:  |
           aws deploy push \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+            --application-name hyu-deploy \
             --ignore-hidden-files \
             --s3-location s3://hyu-backend-bucket/hyu-server-build.zip \
             --source .
@@ -86,7 +85,7 @@ jobs:
       - name: Deploy to AWS EC2 from S3
         run: |
           aws deploy create-deployment \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+            --application-name hyu-deploy \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+            --deployment-group-name hyu-codedploy-deployment-group \
             --s3-location bucket=$S3_BUCKET_NAME,key=hyu-server-build.zip,bundleType=zip
