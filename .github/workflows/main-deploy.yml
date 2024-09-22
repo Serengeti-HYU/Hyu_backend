@@ -42,20 +42,17 @@ jobs:
       - name: Make application.yml
         run: |
           cd ./src/main/resources
-          cat <<EOF > ./application.yml
-${{ secrets.APPLICATION }}
-EOF
+          touch ./application.yml
+          echo "${{ secrets.APPLICATION }}" > ./application.yml
         shell: bash
         
       - name: Make application-secret.yml
         run: |
           cd ./src/main/resources
-          cat <<EOF > ./application-secret.yml
-${{ secrets.APPLICATION_SECRET }}
-EOF
+          touch ./application.yml
+          echo "${{ secrets.APPLICATION_SECRET }}" > ./application.yml
         shell: bash
-
-    
+        
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
