@@ -9,7 +9,7 @@ env:
   AWS_REGION: ap-northeast-2
   S3_BUCKET_NAME: hyu-backend-bucket
   CODE_DEPLOY_APPLICATION_NAME: hyu-deploy
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: hyu-codedploy-deployment-group
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: hyu-codedploy-group
 
 permissions:
   contents: read
@@ -95,5 +95,5 @@ jobs:
           aws deploy create-deployment \
             --application-name hyu-deploy \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
-            --deployment-group-name hyu-codedploy-deployment-group \
+            --deployment-group-name hyu-codedploy-group \
             --s3-location bucket=$S3_BUCKET_NAME,key=hyu-server-build.zip,bundleType=zip
