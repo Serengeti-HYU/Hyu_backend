@@ -74,15 +74,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
           
-    - name: Run MySQL container
-      run: |
-        docker run --name mysql-db -e MYSQL_ROOT_PASSWORD=dongdukhyu \
-          -e MYSQL_DATABASE=hyu_db \
-          -e MYSQL_USER=hyu_admin \
-          -e MYSQL_PASSWORD=dongdukhyu \
-          -p 3306:3306 -d mysql:8
+      - name: Run MySQL container
+        run: |
+          docker run --name mysql-db -e MYSQL_ROOT_PASSWORD=dongdukhyu \
+            -e MYSQL_DATABASE=hyu_db \
+            -e MYSQL_USER=hyu_admin \
+            -e MYSQL_PASSWORD=dongdukhyu \
+            -p 3306:3306 -d mysql:8
     
-    - name: Upload to AWS S3
+      - name: Upload to AWS S3
         run:  |
           aws deploy push \
             --application-name hyu-deploy \
