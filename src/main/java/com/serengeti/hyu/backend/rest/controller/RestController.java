@@ -39,6 +39,8 @@ public class RestController {
     @Autowired
     private UserRepository userRepository;
 
+    private String deployUrl = "http://3.36.241.149:8080"; // 배포 주소 적용
+
     // 쉼활동 목록 조회 -> 성격유형검사의 여부에 따라서 결정됨
     @GetMapping("/recommend")
     public ResponseEntity<List<RestDto>> getCulturalEvents(
@@ -115,8 +117,8 @@ public class RestController {
             return ResponseEntity.notFound().build();
         }
 
-        // 로컬 테스트용 URL -> 나중에 배포된 링크로 바꿔줄 것
-        String shareUrl = "http://localhost:8080/hue-activity/" + restId;
+        // 배포 주소 적용
+        String shareUrl = deployUrl + "/hue-activity/" + restId;
         return ResponseEntity.ok(shareUrl);
     }
 }
